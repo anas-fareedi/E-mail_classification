@@ -4,6 +4,7 @@ import torch.nn as nn
 import pickle
 import re
 import pandas as pd
+from torch.serialization import add_safe_globals
 
 # Page configuration
 st.set_page_config(
@@ -60,12 +61,15 @@ def preprocess_text(text):
     text = re.sub(r'[^a-zA-Z\s]', '', text)
     return text.split()
 
+# Allow your custom class to be loaded safely
+add_safe_globals([EmailClassifier])
+
 # Load model and vocabulary
 @st.cache_resource
 def load_model_and_vocab():
     """Load trained model and vocabulary"""
     try:
-        model = torch.load('email_classifier.pth', map_location=torch.device('cpu'))
+        model = torch.load('email_classifier.pth', map_location=torch.device('cpu'),weights_only=False)
         model.eval()
         
         with open('vocab.pkl', 'rb') as f:
